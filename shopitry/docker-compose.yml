@@ -1,0 +1,25 @@
+# Whole backend + MongoDB in containers:  docker compose up --build
+# Payment/notification run as plain containers locally (they are Lambda functions in AWS).
+services:
+  mongo:
+    image: mongo:7
+    volumes: [mongo-data:/data/db]
+  gateway:
+    build: ./backend/gateway-service
+    ports: ["5000:5000"]
+    environment: &common
+      MONGO_URI: mongodb://mongo:27017
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+      CATALOG_URL: http://catalog:5001
+      CART_URL: http://cart:5002
+      ORDER_URL: http://order:5003
+      PAYMENT_URL: http://payment:5004
+      NOTIFICATION_URL: http://notification:5005
+    depends_on: [mongo, catalog, cart, order, payment, notification]
+  catalog:      { build: ./backend/catalog-service,      environment: *common, depends_on: [mongo] }
+  cart:         { build: ./backend/cart-service,         environment: *common, depends_on: [mongo] }
+  order:        { build: ./backend/order-service,        environment: *common, depends_on: [mongo] }
+  payment:      { build: ./backend/payment-service,      environment: *common }
+  notification: { build: ./backend/notification-service, environment: *common }
+volumes: { mongo-data: {} }

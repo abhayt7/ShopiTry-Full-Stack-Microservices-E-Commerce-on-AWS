@@ -1,0 +1,2 @@
+{ "name": "shopitry", "private": true, "version": "1.0.0",
+  "scripts": { "install:all": "node install-all.js", "start": "node start-all.js", "cleanup": "node cleanup-ports.js" } }
